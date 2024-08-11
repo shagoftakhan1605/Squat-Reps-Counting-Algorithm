@@ -1,127 +1,107 @@
-# Squat-Reps-Counting-Algorithm
-This project uses pose detection data to count squat repetitions and identify incorrect reps where the person did not squat low enough. The analysis is performed using time series analysis and specific algorithms to detect peaks in the movement data.
+# Real-time-squat-rep-analysis-using-Computer-Vision-and-Time-Series
+
+This project aims to analyze squats using real-time body landmark detection and distance measurements, leveraging MediaPipe and OpenCV for computer vision tasks. It records the necessary data, performs time series analysis, and visualizes the results to differentiate between correct and faulty squats.
 
 ## Table of Contents
-
-- [Introduction](#introduction)
+- [Features](#features)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Methodology](#methodology)
-- [Results](#results)
+  - [Real-Time Squat Analysis](#real-time-squat-analysis)
+  - [Time Series Analysis](#time-series-analysis)
+- [Dataset](#dataset)
+- [Model Building](#model-building)
+- [Time Series Analysis and Visualization](#time-series-analysis-and-visualization)
+- [Project Structure](#project-structure)
 - [Contributing](#contributing)
-- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
-## Introduction
+## Features
+- Real-time detection of body landmarks using MediaPipe.
+- Calculation of distances between body parts.
+- Recording of distance data for time series analysis.
+- Visualization of distance data over time.
+- Comprehensive analysis to identify correct and faulty squats.
 
-Squat exercises are a fundamental component of many fitness routines. Accurately counting repetitions and identifying incorrect reps can help in improving workout quality and effectiveness. This project leverages time series analysis to automatically count squat reps and detect incorrect reps using pose detection output data.
+## Requirements
+- Python 3.x
+- TensorFlow
+- OpenCV
+- Matplotlib
+- MediaPipe
+- pandas
 
 ## Installation
-Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+Install the required libraries:
+  ```bash
+  pip install tensorflow opencv-python matplotlib mediapipe pandas
+  ```
 
 ## Usage
 
-1. Ensure you have the pose detection output data saved as `test_data.txt` in the project directory.
-2. Run the main script to count the squat reps and visualize the results:
-   ```bash
-   python Squat_Rep_Counting.py
-   ```
+### Real-Time Squat Analysis
+1. Run the real-time squat analysis script:
+    ```bash
+    python real_time_squat_analysis.ipynb
+    ```
 
-## Methodology
+2. Perform squats in front of your webcam. The system will analyze the squats, display the results, and save the distance data to `squat_landmark_distances.txt`.
 
-### Loading Pose Detection Data
+### Time Series Analysis
+1. After recording the squat data, run the time series analysis script:
+    ```bash
+    python time_series_analysis.ipynb
+    ```
 
-The pose detection output data is loaded and parsed. The keypoints for different body parts are extracted and normalized.
+2. The script will analyze the recorded data, visualize the results, and provide insights into the squat performance.
 
-```python
-import pandas as pd
-import matplotlib.pyplot as plt
+## Dataset
+The dataset consists of distance measurements between specific body landmarks recorded during the squat exercise. The distances are saved in the file `squat_landmark_distances.txt`.
 
-keypoints = ['NOSE','LEFT_EYE','RIGHT_EYE','LEFT_EAR','RIGHT_EAR','LEFT_SHOULDER','RIGHT_SHOULDER','LEFT_ELBOW','RIGHT_ELBOW','LEFT_WRIST','RIGHT_WRIST','LEFT_HIP','RIGHT_HIP','LEFT_KNEE','RIGHT_KNEE','LEFT_ANKLE','RIGHT_ANKLE']
-keypoints_x, keypoints_y = [], []
-for points in keypoints:
-  keypoints_y.append(points + "_y")
-  keypoints_x.append(points + "_x")
-
-df_header = ['TIME'] + keypoints_y + keypoints_x
-df = pd.read_csv("test_data.txt", index_col=False, names=df_header)
+### Example Data Structure:
+```
+left_ankle_to_left_knee, left_ankle_to_left_hip, left_ankle_to_left_elbow, left_ankle_to_left_eye
+0.123, 0.456, 0.789, 1.012
+...
 ```
 
-### Data Cleaning and Preprocessing
+## Model Building
+The model uses MediaPipe for real-time body landmark detection and OpenCV for image processing. The distance between body parts is calculated to analyze the squat performance.
 
-Negative entries are replaced with NaN, and NaN values are filled using the 'backfill' method to ensure data consistency.
+### Key Components:
+1. **MediaPipe Pose**: Used for real-time body landmark detection.
+2. **OpenCV**: Used for handling real-time video feed and image processing.
+3. **Distance Calculation**: Calculates Euclidean distances between various body landmarks to assess squat form.
 
-```python
-import numpy as np
+## Time Series Analysis and Visualization
+The time series analysis script processes the recorded data and visualizes the results. Key distances between body parts are plotted to assess squat form comprehensively.
 
-df[df < 0] = np.nan
-df = df.apply(pd.to_numeric, errors='coerce')
-df.fillna(method='backfill', inplace=True)
+### Key Steps:
+1. **Load the Dataset**: Load the recorded distances into a pandas DataFrame.
+2. **Data Cleaning**: Convert columns to numeric and handle missing values.
+3. **Distance Plotting**: Plot the vertical distances between different body parts over time.
+
+### Instructions to Interpret Results:
+1. **Vertical Distance Plot**: Vertical distances between the left ankle and various body parts (hip, knee, elbow, eye) are plotted over time.
+2. **Identify Patterns**: Look for patterns in the plotted data to understand the squat performance. Consistent changes in vertical distances can indicate the depth and form of squats.
+
+### Reading the Results:
+- **Time Series Plots**: Multiple plots showing the vertical distances between the left ankle and other body parts (hip, knee, elbow, eye) over time.
+- **Identify Trends**: Observe the trends and patterns in the plots to evaluate squat performance. Consistent and proper squats will show regular patterns, while improper squats may show irregular patterns or anomalies.
+
+## Project Structure
 ```
-
-### Time-Series Analysis
-
-Using the `scipy.signal.find_peaks` function, peaks in the time series data are detected. Correct and incorrect squat reps are identified based on these peaks.
-
-```python
-from scipy.signal import find_peaks
-
-def intersection(lst1, lst2):
-    return [value for value in lst1 if value in lst2]
-
-t = 75
-t1 = 410
-labels = ['NOSE_y','LEFT_EYE_y','RIGHT_EYE_y','LEFT_EAR_y','RIGHT_EAR_y','LEFT_SHOULDER_y','RIGHT_SHOULDER_y','LEFT_HIP_y','RIGHT_HIP_y','NOSE_x','LEFT_EYE_x', 'RIGHT_EYE_x','LEFT_EAR_x','RIGHT_EAR_x','LEFT_SHOULDER_x','RIGHT_SHOULDER_x','LEFT_HIP_x','RIGHT_HIP_x','LEFT_KNEE_x','RIGHT_KNEE_x']
-
-thres = [80,73,73,67,61,100,100,157,157,100,157,80,73,73,67,59,151,163,157,157]
-correct_squats = []
-
-for i in range(len(labels)):
-  x = df[labels[i]].to_numpy()
-  peaks2, _ = find_peaks(x, prominence=25, distance=20)
-  l3 = intersection(list(peaks2[peaks2 > t]), list(peaks2[peaks2 < t1]))
-  total_reps = len(l3)
-  peaks2, _ = find_peaks(x, prominence=25, distance=20, height=thres[i])
-  l3 = intersection(list(peaks2[peaks2 > t]), list(peaks2[peaks2 < t1]))
-  correct_squats.append(len(l3))
-
-correct_squats = np.array(correct_squats)
-mean = correct_squats.mean()
-print('Correct Squat Reps:', int(mean))
+insect-squat-analysis/
+├── real_time_squat_analysis.ipynb
+├── squat_landmark_distances.txt
+├── time_series_analysis.ipynb
+├── README.md
 ```
-
-### Visualization
-
-The results are visualized using matplotlib, showing the detected peaks for correct and incorrect squat reps.
-
-```python
-plt.figure(figsize=(15,60))
-for i in range(len(labels)):
-  x = df[labels[i]].to_numpy()
-  peaks2, _ = find_peaks(x, prominence=25, distance=20)
-  l3 = intersection(list(peaks2[peaks2 > t]), list(peaks2[peaks2 < t1]))
-
-  plt.subplot(20,2,i+1)
-  peaks2, _ = find_peaks(x, prominence=25, distance=20, height=thres[i])
-  l3 = intersection(list(peaks2[peaks2 > t]), list(peaks2[peaks2 < t1]))
-  plt.plot(np.asarray(l3), x[np.asarray(np.unique(l3))], "xb", label='Correct Reps')
-  plt.plot(x)
-  plt.title(labels[i])
-  plt.legend()
-
-plt.tight_layout()
-plt.show()
-```
-
-## Results
-
-- **Correct Squat Reps:** Calculated as the mean of the detected correct reps from all keypoints.
-- **Incorrect Squat Reps:** Calculated based on the difference between total detected peaks and correct peaks.
-
-The results are displayed with the number of correct, incorrect, and total squat reps, along with visual plots indicating the detected peaks.
 
 ## Contributing
+Contributions are welcome! Please open an issue or submit a pull request for any changes or improvements.
 
-Contributions are welcome! Please submit a pull request or open an issue to discuss any changes or improvements.
+## Acknowledgements
+- This project uses [MediaPipe](https://mediapipe.dev/) for body landmark detection.
+- [OpenCV](https://opencv.org/) is used for image processing and real-time video feed handling.
+- Special thanks to the contributors of the open-source libraries and tools used in this project.
