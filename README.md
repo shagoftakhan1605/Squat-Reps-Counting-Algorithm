@@ -4,7 +4,7 @@ This project aims to analyze squats using real-time body landmark detection and 
 
 ## Table of Contents
 - [Features](#features)
-- [Results] (#results)
+- [Results](#results)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
