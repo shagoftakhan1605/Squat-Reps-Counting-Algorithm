@@ -4,6 +4,7 @@ This project aims to analyze squats using real-time body landmark detection and 
 
 ## Table of Contents
 - [Features](#features)
+- [Results] (#results)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -22,6 +23,13 @@ This project aims to analyze squats using real-time body landmark detection and 
 - Recording of distance data for time series analysis.
 - Visualization of distance data over time.
 - Comprehensive analysis to identify correct and faulty squats.
+
+## Results
+![3](https://github.com/user-attachments/assets/32ec32d0-ddb7-40e0-b103-34ca61c40895)
+![2](https://github.com/user-attachments/assets/5114b10e-2cb0-43c9-83d2-30c4c3c14f37)
+![1](https://github.com/user-attachments/assets/3ecc4c9d-4a66-4653-bc7d-16ecc10d977c)
+![4](https://github.com/user-attachments/assets/d576ccd9-742c-423e-9a50-5d7548943aad)
+
 
 ## Requirements
 - Python 3.x
